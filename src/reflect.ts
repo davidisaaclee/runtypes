@@ -25,7 +25,7 @@ export type Reflect =
   | ({ tag: 'dictionary'; key: 'string' | 'number' | 'symbol'; value: Reflect } & Runtype<{
       [_: string]: unknown;
     }>)
-  | ({ tag: 'tuple'; components: Reflect[] } & Runtype<unknown[]>)
+  | ({ tag: 'tuple'; components: Reflect[] } & Runtype<readonly unknown[]>)
   | ({ tag: 'union'; alternatives: Reflect[] } & Runtype)
   | ({ tag: 'intersect'; intersectees: Reflect[] } & Runtype)
   | ({ tag: 'optional'; underlying: Reflect } & Runtype)

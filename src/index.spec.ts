@@ -188,6 +188,7 @@ const runtypes = {
   PartialProperty: Record({ foo: String }).And(RTPartial({ bar: Number })),
   ReadonlyNumberArray: Array(Number).asReadonly(),
   ReadonlyRecord: Record({ foo: Number, bar: String }).asReadonly(),
+  ReadonlyTuple: Tuple(Number, Number).asReadonly(),
   Graph,
   SRDict,
   Hand,
@@ -769,6 +770,13 @@ describe('reflection', () => {
     expect(Tuple(X, X).components.map(C => C.value)).toEqual(['x', 'x']);
   });
 
+  it('tuple (asReadonly)', () => {
+    expectLiteralField(Tuple(X, X).asReadonly(), 'tag', 'tuple');
+    expect(Tuple(X, X).components.map(C => C.tag)).toEqual(['literal', 'literal']);
+    expect(Tuple(X, X).components.map(C => C.value)).toEqual(['x', 'x']);
+    expectLiteralField(Tuple(X, X).asReadonly(), 'isReadonly', true);
+  });
+
   it('string dictionary', () => {
     const Rec = Dictionary(Unknown);
     expectLiteralField(Rec, 'tag', 'dictionary');
@@ -902,7 +910,8 @@ describe('change static type with Constraint', () => {
     | Record<{ [_ in string]: Reflect }, true>
     | RTPartial<{ [_ in string]: Reflect }, false>
     | RTPartial<{ [_ in string]: Reflect }, true>
-    | Tuple<[Reflect, Reflect]>
+    | Tuple<[Reflect, Reflect], false>
+    | Tuple<[Reflect, Reflect], true>
     | Union<[Reflect, Reflect]>
     | Intersect<[Reflect, Reflect]>
     | Optional<Reflect>
@@ -944,7 +953,7 @@ describe('change static type with Constraint', () => {
       check<{ readonly [K in keyof typeof X.fields]: Static<typeof X.fields[K]> }>(X);
       break;
     case 'tuple':
-      check<[Static<typeof X.components[0]>, Static<typeof X.components[1]>]>(X);
+      check<readonly [Static<typeof X.components[0]>, Static<typeof X.components[1]>]>(X);
       break;
     case 'union':
       check<Static<typeof X.alternatives[0]> | Static<typeof X.alternatives[1]>>(X);
